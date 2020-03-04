@@ -1,0 +1,55 @@
+version: '3'
+services:
+  traefik:
+    image: traefik:2.1
+    ports:
+      - "80:80"     # The HTTP port
+      - "443:443"     # The HTTP port
+      - "8080:8080"     # The API port
+    labels:
+      - "traefik.enable=false"
+    networks:
+      - traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./acme.json:/acme.json
+    command:
+      #- "--log.level=ERROR"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      #- "--certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.le.acme.email=$ACME_EMAIL"
+      - "--certificatesresolvers.le.acme.storage=/acme.json"
+      - "--certificatesResolvers.le.acme.httpChallenge.entryPoint=web"
+
+  portainer:
+    image: portainer/portainer
+    restart: always
+    networks:
+      - traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=$TRAEFIK_NETWORK"
+      - "traefik.http.middlewares.onlyhttps.redirectscheme.scheme=https"
+      - "traefik.http.routers.portainer-insecure.rule=Host(`${PORTAINER_HOST}`)"
+      - "traefik.http.routers.portainer-insecure.entrypoints=web"
+      - "traefik.http.routers.portainer-insecure.middlewares=onlyhttps"
+      - "traefik.http.routers.portainer.rule=Host(`${PORTAINER_HOST}`)"
+      - "traefik.http.routers.portainer.tls=true"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.tls.certresolver=le"
+
+volumes:
+  portainer_data:
+
+networks:
+  traefik:
+    external:
+      name: $TRAEFIK_NETWORK
