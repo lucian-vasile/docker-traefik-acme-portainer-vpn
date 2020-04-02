@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+
+  ### WEBSITE ###
+  wp:
+    image: wordpress:latest
+    volumes:
+      - ./source:/var/www/html
+      - ./conf/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./logs:/remote_logs
+    networks:
+      - default
+      - traefik
+    environment:
+      WORDPRESS_DB_HOST: wp-db
+      WORDPRESS_DB_NAME: "${DB_DATABASE}"
+      WORDPRESS_DB_USER: "${DB_USERNAME}"
+      WORDPRESS_DB_PASSWORD: "${DB_PASSWORD}"
+    ports:
+      - "80"
+    restart: "unless-stopped"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${TRAEFIK_NETWORK}"
+      - "traefik.http.middlewares.onlyhttps-${DOCKER_RULES_GROUP}.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.towww-${DOCKER_RULES_GROUP}.redirectregex.regex=https://${APP_DOMAIN}(.*)"
+      - "traefik.http.middlewares.towww-${DOCKER_RULES_GROUP}.redirectregex.replacement=https://www.${APP_DOMAIN}$${2}"
+      - "traefik.http.routers.wp-insecure-${DOCKER_RULES_GROUP}.rule=Host(`${APP_DOMAIN}`) || Host(`www.${APP_DOMAIN}`)"
+      - "traefik.http.routers.wp-insecure-${DOCKER_RULES_GROUP}.entrypoints=web"
+      - "traefik.http.routers.wp-insecure-${DOCKER_RULES_GROUP}.middlewares=onlyhttps-${DOCKER_RULES_GROUP}"
+      - "traefik.http.routers.wp-${DOCKER_RULES_GROUP}.rule=Host(`${APP_DOMAIN}`) || Host(`www.${APP_DOMAIN}`)"
+      - "traefik.http.routers.wp-${DOCKER_RULES_GROUP}.middlewares=towww-${DOCKER_RULES_GROUP}"
+      - "traefik.http.routers.wp-${DOCKER_RULES_GROUP}.tls=true"
+      - "traefik.http.routers.wp-${DOCKER_RULES_GROUP}.entrypoints=websecure"
+      - "traefik.http.routers.wp-${DOCKER_RULES_GROUP}.tls.certresolver=le"
+      - "traefik.http.services.wp-${DOCKER_RULES_GROUP}.loadbalancer.server.port=80"
+
+  wp-db:
+    image: mariadb:latest
+    volumes:
+      - wp_db_data:/var/lib/mysql
+      - ./conf/wp/50-server.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf
+      - ./logs:/remote_logs
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: $DB_DATABASE
+      MYSQL_USER: $DB_USERNAME
+      MYSQL_PASSWORD: $DB_PASSWORD
+    restart: "unless-stopped"
+    labels:
+      - "traefik.enable=false"
+    ports:
+      - "3306"
+
+
+networks:
+  traefik:
+    external:
+      name: "${TRAEFIK_NETWORK}"
+
+volumes:
+  wp_db_data:
+  mautic_db_data:
