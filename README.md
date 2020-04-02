@@ -12,3 +12,6 @@ Docker Infrastructure for a server with automatic SSL, portainer as a docker man
 8. Run `docker-compose up -d`
 
 If everything was correctly set up, you should be able to navigate to your `PORTAINER_HOST` and setup the username and password for the Portainer account.
+
+## Other components
+1. [Wordpress](/wordpress)
