@@ -46,6 +46,18 @@ services:
       - "traefik.http.routers.portainer.entrypoints=websecure"
       - "traefik.http.routers.portainer.tls.certresolver=le"
 
+  vpn:
+    image: hwdsl2/ipsec-vpn-server
+    restart: "always"
+    privileged: true
+    ports:
+      - "500:500/udp"
+      - "4500:4500/udp"
+    environment:
+      - "VPN_IPSEC_PSK=${VPN_PSK}"
+      - "VPN_USER=${VPN_USERNAME}"
+      - "VPN_PASSWORD=${VPN_PASSWORD}"
+
 volumes:
   portainer_data:
 
