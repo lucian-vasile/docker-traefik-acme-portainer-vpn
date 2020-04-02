@@ -61,4 +61,3 @@ networks:
 
 volumes:
   wp_db_data:
-  mautic_db_data:
