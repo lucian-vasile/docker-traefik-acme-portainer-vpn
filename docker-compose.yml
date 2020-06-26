@@ -1,7 +1,7 @@
 version: '3'
 services:
   traefik:
-    image: traefik:2.1
+    image: traefik:latest
     ports:
       - "80:80"     # The HTTP port
       - "443:443"     # The HTTP port
@@ -12,19 +12,17 @@ services:
       - traefik
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./acme.json:/acme.json
+      - ./cert:/tools/cert:ro
+      - ./dynamic_config:/etc/traefik/dynamic_conf:ro
     command:
-      #- "--log.level=ERROR"
+      - "--log.level=ERROR"
       - "--api.insecure=true"
       - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      #- "--certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.le.acme.email=$ACME_EMAIL"
-      - "--certificatesresolvers.le.acme.storage=/acme.json"
-      - "--certificatesResolvers.le.acme.httpChallenge.entryPoint=web"
+      - "--providers.file.directory=/etc/traefik/dynamic_conf"
 
   portainer:
     image: portainer/portainer
@@ -44,19 +42,6 @@ services:
       - "traefik.http.routers.portainer.rule=Host(`${PORTAINER_HOST}`)"
       - "traefik.http.routers.portainer.tls=true"
       - "traefik.http.routers.portainer.entrypoints=websecure"
-      - "traefik.http.routers.portainer.tls.certresolver=le"
-
-  vpn:
-    image: hwdsl2/ipsec-vpn-server
-    restart: "always"
-    privileged: true
-    ports:
-      - "500:500/udp"
-      - "4500:4500/udp"
-    environment:
-      - "VPN_IPSEC_PSK=${VPN_PSK}"
-      - "VPN_USER=${VPN_USERNAME}"
-      - "VPN_PASSWORD=${VPN_PASSWORD}"
 
 volumes:
   portainer_data:

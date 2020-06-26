@@ -1,3 +1,8 @@
 .env
 .idea
 acme.json
+/cert/*
+!/cert/local.cnf
+!/cert/README.md
+/dynamic_config/*
+!/dynamic_config/conf.yml

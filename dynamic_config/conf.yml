@@ -1,0 +1,6 @@
+tls:
+  certificates:
+    - certFile: "/tools/cert/local.crt"
+      keyFile: "/tools/cert/local.key"
+      stores:
+        - default
