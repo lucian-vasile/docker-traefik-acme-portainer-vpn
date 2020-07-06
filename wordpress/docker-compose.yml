@@ -40,7 +40,7 @@ services:
     image: mariadb:latest
     volumes:
       - wp_db_data:/var/lib/mysql
-      - ./conf/wp/50-server.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf
+      - ./conf/mariadb/50-server.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf
       - ./logs:/remote_logs
     environment:
       MYSQL_ROOT_PASSWORD: admin
