@@ -15,7 +15,6 @@ services:
       - ./cert:/tools/cert:ro
       - ./dynamic_config:/etc/traefik/dynamic_conf:ro
     command:
-      - "--log.level=ERROR"
       - "--api.insecure=true"
       - "--api.dashboard=true"
       - "--providers.docker=true"
