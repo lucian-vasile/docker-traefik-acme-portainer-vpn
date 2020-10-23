@@ -5,6 +5,7 @@ services:
   ### WEBSITE ###
   wp:
     image: wordpress:latest
+    container_name: wp-${DOCKER_RULES_GROUP}
     volumes:
       - ./source:/var/www/html
       - ./conf/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
@@ -38,6 +39,7 @@ services:
 
   wp-db:
     image: mariadb:latest
+    container_name: wp-db-${DOCKER_RULES_GROUP}
     volumes:
       - wp_db_data:/var/lib/mysql
       - ./conf/mariadb/50-server.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf
