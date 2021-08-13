@@ -3,9 +3,8 @@ services:
   traefik:
     image: traefik:2.1
     ports:
-      - "80:80"     # The HTTP port
-      - "443:443"     # The HTTP port
-      - "8080:8080"     # The API port
+      - "80:80"
+      - "443:443"
     labels:
       - "traefik.enable=false"
     networks:
@@ -14,14 +13,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./acme.json:/acme.json
     command:
-      #- "--log.level=ERROR"
-      - "--api.insecure=true"
-      - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      #- "--certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
       - "--certificatesresolvers.le.acme.email=$ACME_EMAIL"
       - "--certificatesresolvers.le.acme.storage=/acme.json"
       - "--certificatesResolvers.le.acme.httpChallenge.entryPoint=web"
