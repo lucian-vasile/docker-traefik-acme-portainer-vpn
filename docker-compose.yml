@@ -3,9 +3,8 @@ services:
   traefik:
     image: traefik:latest
     ports:
-      - "80:80"     # The HTTP port
-      - "443:443"     # The HTTP port
-      - "8080:8080"     # The API port
+      - "80:80"
+      - "443:443"
     labels:
       - "traefik.enable=false"
     networks:
@@ -15,8 +14,6 @@ services:
       - ./cert:/tools/cert:ro
       - ./dynamic_config:/etc/traefik/dynamic_conf:ro
     command:
-      - "--api.insecure=true"
-      - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web.address=:80"
